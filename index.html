@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elysée Shuttle</title>
+<meta name="description" content="Next private shuttle between Hôtel l'Elysée Val d'Europe and Disneyland Paris.">
+<meta name="theme-color" content="#2f4a54">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Shuttle">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --card: #ffffff;
+    --ink: #1d2a2f;
+    --muted: #6b7a80;
+    --line: #e4e0d6;
+    --slate: #2f4a54;
+    --slate-2: #44606b;
+    --gold: #e9a92a;
+    --gold-soft: #fdf1d8;
+    --urgent: #c2410c;
+    --chip: #eef1f2;
+    --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(29,42,47,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1719;
+      --card: #172225;
+      --ink: #eef3f4;
+      --muted: #8fa1a7;
+      --line: #263438;
+      --slate: #9cc3cf;
+      --slate-2: #6f98a5;
+      --gold: #f2b632;
+      --gold-soft: #2c2412;
+      --urgent: #fb923c;
+      --chip: #1f2d31;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+    padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));
+  }
+  main { max-width: 480px; margin: 0 auto; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 0 14px; }
+  .brand { font-weight: 700; letter-spacing: .02em; font-size: 15px; color: var(--slate); }
+  .brand small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; letter-spacing: 0; }
+  .loc {
+    border: 0; background: var(--chip); color: var(--ink);
+    font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap;
+    max-width: 60%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .loc .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+  .loc.on .dot { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
+
+  .seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--chip); padding: 4px; border-radius: 14px; gap: 4px; }
+  .seg button {
+    border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 15px;
+    padding: 11px 8px; border-radius: 10px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  .modeline { display: flex; justify-content: space-between; align-items: center; min-height: 30px; font-size: 13px; color: var(--muted); padding: 6px 2px 0; }
+  .linkbtn { border: 0; background: none; color: var(--slate); font: inherit; font-weight: 600; padding: 4px 0; cursor: pointer; }
+
+  .notice { background: var(--gold-soft); border-radius: 12px; padding: 10px 12px; font-size: 13px; margin-top: 10px; }
+  .notice a { color: inherit; font-weight: 600; }
+
+  .hero {
+    margin-top: 12px; background: var(--slate); color: #fff; border-radius: 22px; padding: 20px 20px 18px;
+    position: relative; overflow: hidden;
+  }
+  @media (prefers-color-scheme: dark) { .hero { background: #1d3940; } }
+  .hero .label { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+  .hero .route { font-size: 15px; margin-top: 2px; opacity: .9; }
+  .hero .time { font-size: 64px; font-weight: 700; letter-spacing: -.02em; line-height: 1.05; margin-top: 14px; }
+  .hero .time .day { font-size: 18px; font-weight: 600; letter-spacing: 0; opacity: .8; margin-left: 6px; }
+  .hero .count { display: inline-block; margin-top: 8px; background: var(--gold); color: #1d2a2f; font-weight: 700; border-radius: 999px; padding: 5px 12px; font-size: 15px; }
+  .hero .count.urgent { background: #fff; color: var(--urgent); }
+  .hero .arrive { margin-top: 12px; font-size: 14px; opacity: .85; }
+  .hero .then { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.15); font-size: 14px; opacity: .9; }
+  .hero .then b { font-weight: 600; margin-right: 10px; }
+  .hero.none .time { font-size: 30px; }
+
+  .card { background: var(--card); border-radius: 18px; padding: 16px; margin-top: 12px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .stop-name { font-weight: 700; font-size: 17px; }
+  .stop-hint { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px;
+    background: var(--chip); color: var(--ink); text-decoration: none; font-weight: 600;
+    padding: 12px; border-radius: 12px; font-size: 15px;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .t {
+    text-align: center; padding: 10px 0; border-radius: 10px; background: var(--chip); font-weight: 600; font-size: 15px;
+  }
+  .t.past { opacity: .35; text-decoration: line-through; font-weight: 500; }
+  .t.next { background: var(--gold); color: #1d2a2f; }
+  .t.late { font-size: 13px; }
+  .gap { grid-column: 1 / -1; font-size: 12px; color: var(--muted); text-align: center; padding: 2px 0; }
+  .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .meta h2 { margin: 0; }
+  .pill { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--chip); color: var(--muted); }
+  .pill.high { background: var(--gold-soft); color: var(--gold); }
+
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 22px; line-height: 1.6; }
+  footer a { color: var(--slate); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">Shuttle<small>L'Elysée ⇄ Disneyland</small></div>
+    <button class="loc" id="loc" type="button"><span class="dot"></span><span id="locText">Locating…</span></button>
+  </header>
+
+  <div class="seg" role="group" aria-label="Direction">
+    <button type="button" id="btnPark" aria-pressed="false">To Disney</button>
+    <button type="button" id="btnHotel" aria-pressed="false">To hotel</button>
+  </div>
+  <div class="modeline"><span id="modeText"></span><button class="linkbtn" id="btnAuto" hidden type="button">Use my location</button></div>
+
+  <div id="notice"></div>
+
+  <section class="hero" id="hero" aria-live="polite"></section>
+
+  <section class="card" id="stop"></section>
+
+  <section class="card">
+    <div class="meta"><h2 id="listTitle">Today</h2><span class="pill" id="season"></span></div>
+    <div class="grid tnum" id="list"></div>
+  </section>
+
+  <footer>
+    <div id="src"></div>
+    <div>Ride takes about <span id="jt"></span> min, via the two Adagio stops.</div>
+    <div><a id="pdf" href="#" target="_blank" rel="noopener">Check the hotel's latest timetable</a></div>
+  </footer>
+</main>
+
+<script src="schedule.js"></script>
+<script>
+(() => {
+  const S = window.SHUTTLE;
+  const TZ = "Europe/Paris";
+  const CUTOFF = 3 * 60;            // service day runs until 03:00
+  const NEAR_M = 700;               // "at the hotel / in the park" radius
+  const $ = id => document.getElementById(id);
+
+  // ---------- storage (best effort) ----------
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+  };
+
+  // ---------- dates ----------
+  function parisParts(date = new Date()) {
+    const o = {};
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+    }).formatToParts(date).forEach(p => o[p.type] = p.value);
+    return { y: +o.year, m: +o.month, d: +o.day, h: +o.hour % 24, mi: +o.minute, s: +o.second };
+  }
+  const iso = d => d.toISOString().slice(0, 10);
+  const addDays = (isoStr, n) => { const d = new Date(isoStr + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
+
+  // Current service day + seconds since its midnight (can exceed 24h after midnight)
+  function serviceNow() {
+    const p = parisParts();
+    let day = iso(new Date(Date.UTC(p.y, p.m - 1, p.d, 12)));
+    let mins = p.h * 60 + p.mi;
+    if (mins < CUTOFF) { day = addDays(day, -1); mins += 1440; }
+    return { day, sec: mins * 60 + p.s };
+  }
+  const toMin = t => { const [h, m] = t.split(":").map(Number); const v = h * 60 + m; return v < CUTOFF ? v + 1440 : v; };
+  const fmt = m => { m %= 1440; return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); };
+
+  // ---------- seasons ----------
+  function expand(list) {
+    const set = new Set();
+    (list || []).forEach(e => {
+      const [a, b] = e.split("/");
+      if (!b) { set.add(a); return; }
+      for (let d = a; d <= b; d = addDays(d, 1)) set.add(d);
+    });
+    return set;
+  }
+  const HIGH = expand(S.highSeasonDates);
+  const NONE = expand(S.noServiceDates);
+  const covered = day => day >= S.calendarCovers.from && day <= S.calendarCovers.to;
+  function seasonOf(day) {
+    if (NONE.has(day)) return "none";
+    if (HIGH.has(day)) return "high";
+    return covered(day) ? "low" : (S.defaultSeason || "low");
+  }
+  function times(day, dir) {
+    const s = seasonOf(day);
+    if (s === "none") return [];
+    return S.timetables[s][dir].map(toMin).sort((a, b) => a - b);
+  }
+
+  // ---------- location ----------
+  let pos = null, locError = null;
+  function dist(lat1, lng1, lat2, lng2) {
+    const R = 6371000, r = Math.PI / 180;
+    const dLat = (lat2 - lat1) * r, dLng = (lng2 - lng1) * r;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  const zoneDist = place => Math.min(...place.zone.map(([la, ln]) => dist(pos.lat, pos.lng, la, ln)));
+  function whereAmI() {
+    if (!pos) return null;
+    const dh = zoneDist(S.places.hotel), dp = zoneDist(S.places.park);
+    return dh <= dp ? { at: "hotel", d: dh } : { at: "park", d: dp };
+  }
+  const km = m => m < 1000 ? Math.round(m / 10) * 10 + " m" : (m / 1000).toFixed(1) + " km";
+
+  function startLocation() {
+    if (!("geolocation" in navigator)) { locError = "unsupported"; render(); return; }
+    locError = null;
+    navigator.geolocation.watchPosition(
+      p => { pos = { lat: p.coords.latitude, lng: p.coords.longitude }; locError = null; render(); },
+      e => { locError = e.code === 1 ? "denied" : "unavailable"; render(); },
+      { enableHighAccuracy: false, maximumAge: 60000, timeout: 20000 }
+    );
+  }
+
+  // ---------- direction ----------
+  let manual = null;  // null = auto
+  function direction() {
+    if (manual) return manual;
+    const w = whereAmI();
+    if (w) return w.at === "hotel" ? "toPark" : "toHotel";
+    const saved = store.get("dir");
+    if (saved === "toPark" || saved === "toHotel") return saved;
+    const p = parisParts();
+    return p.h >= 3 && p.h < 14 ? "toPark" : "toHotel";
+  }
+
+  // ---------- render ----------
+  function countdown(sec) {
+    if (sec < 60) return "Leaving now";
+    const m = Math.floor(sec / 60);
+    if (m < 60) return "in " + m + " min";
+    const h = Math.floor(m / 60), r = m % 60;
+    return "in " + h + " h" + (r ? " " + r + " min" : "");
+  }
+  const mapsLink = (lat, lng) => /iPhone|iPad|Mac/.test(navigator.userAgent)
+    ? `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=w`
+    : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function render() {
+    const dir = direction();
+    const now = serviceNow();
+    const nowMin = Math.floor(now.sec / 60);
+    const from = dir === "toPark" ? S.places.hotel : S.places.park;
+    const to = dir === "toPark" ? S.places.park : S.places.hotel;
+
+    // location chip
+    const w = whereAmI();
+    const loc = $("loc");
+    loc.classList.toggle("on", !!w);
+    $("locText").textContent = w
+      ? (w.d <= NEAR_M ? (w.at === "hotel" ? "At the hotel" : "At Disneyland") : (w.at === "hotel" ? "Hotel" : "Disney") + " · " + km(w.d))
+      : locError === "denied" ? "Location off" : locError ? "No location" : "Locating…";
+
+    // segmented control
+    $("btnPark").setAttribute("aria-pressed", dir === "toPark");
+    $("btnHotel").setAttribute("aria-pressed", dir === "toHotel");
+    $("modeText").textContent = manual ? "Chosen manually" : w ? "Picked from your location" : "Tap a direction";
+    $("btnAuto").hidden = !(manual && w);
+
+    // notice
+    const season = seasonOf(now.day);
+    $("notice").innerHTML = covered(now.day) ? "" :
+      `<div class="notice">This timetable only covers ${S.calendarCovers.from.slice(5).split("-").reverse().join("/")}–${S.calendarCovers.to.slice(5).split("-").reverse().join("/")}. Showing ${S.defaultSeason}-season times — <a href="${esc(S.pdfPage)}" target="_blank" rel="noopener">check for a new one</a>.</div>`;
+
+    // next departures
+    const today = times(now.day, dir);
+    const upcoming = today.filter(m => m >= nowMin);
+    let next = null, nextDayLabel = "", later = [];
+    if (upcoming.length) {
+      next = upcoming[0]; later = upcoming.slice(1, 4);
+    } else {
+      // look ahead up to a week for the next running day
+      for (let i = 1; i <= 7; i++) {
+        const t = times(addDays(now.day, i), dir);
+        if (t.length) { next = t[0] + 1440 * i; later = t.slice(1, 3).map(m => m + 1440 * i); nextDayLabel = i === 1 ? "tomorrow" : new Date(addDays(now.day, i) + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" }); break; }
+      }
+    }
+
+    const hero = $("hero");
+    const routeTxt = `${dir === "toPark" ? "Hotel → Disneyland" : "Disneyland → Hotel"}`;
+    if (next === null) {
+      hero.className = "hero none";
+      hero.innerHTML = `<div class="label">Next shuttle</div><div class="route">${routeTxt}</div><div class="time">No shuttle found</div>`;
+    } else {
+      const secs = next * 60 - now.sec;
+      const gapToday = upcoming.length && upcoming[0] - nowMin > 90 && nowMin > today[0];
+      hero.className = "hero";
+      hero.innerHTML = `
+        <div class="label">Next shuttle</div>
+        <div class="route">${routeTxt}</div>
+        <div class="time tnum">${fmt(next)}${nextDayLabel ? `<span class="day">${nextDayLabel}</span>` : ""}</div>
+        <span class="count ${secs < 600 ? "urgent" : ""}">${countdown(secs)}</span>
+        <div class="arrive">Arrives around ${fmt(next + (S.journeyMinutes || 10))}${gapToday ? " · no buses midday" : ""}</div>
+        ${later.length ? `<div class="then tnum">Then&nbsp; ${later.map(m => `<b>${fmt(m)}</b>`).join("")}</div>` : `<div class="then">Last shuttle ${nextDayLabel ? nextDayLabel : "today"}</div>`}`;
+    }
+
+    // boarding stop
+    $("stop").innerHTML = `
+      <h2>Board at</h2>
+      <div class="stop-name">${esc(from.boardAt)}</div>
+      <div class="stop-hint">${esc(from.hint)}</div>
+      <a class="btn" href="${mapsLink(from.lat, from.lng)}" target="_blank" rel="noopener">Walk there ↗</a>`;
+
+    // full list
+    const pill = $("season");
+    pill.textContent = season === "high" ? "High season" : season === "none" ? "No service" : "Low season";
+    pill.className = "pill" + (season === "high" ? " high" : "");
+    $("listTitle").textContent = `Today · ${dir === "toPark" ? "to Disney" : "to hotel"}`;
+    let html = "", prev = null, marked = false;
+    today.forEach(m => {
+      if (prev !== null && m - prev > 120) html += `<div class="gap">· · · no shuttle ${fmt(prev)}–${fmt(m)} · · ·</div>`;
+      let cls = "t";
+      if (m < nowMin) cls += " past";
+      else if (!marked) { cls += " next"; marked = true; }
+      if (m >= 1440) cls += " late";
+      html += `<div class="${cls}">${fmt(m)}</div>`;
+      prev = m;
+    });
+    $("list").innerHTML = html || `<div class="gap">No shuttle today</div>`;
+  }
+
+  // ---------- events ----------
+  $("btnPark").onclick = () => { manual = "toPark"; store.set("dir", manual); render(); };
+  $("btnHotel").onclick = () => { manual = "toHotel"; store.set("dir", manual); render(); };
+  $("btnAuto").onclick = () => { manual = null; render(); };
+  $("loc").onclick = () => { if (!pos) startLocation(); else { manual = null; render(); } };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+
+  $("src").textContent = S.source;
+  $("jt").textContent = S.journeyMinutes || 10;
+  $("pdf").href = S.pdfPage;
+
+  render();
+  startLocation();
+  setInterval(render, 15000);
+
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
